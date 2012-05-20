@@ -1,0 +1,1 @@
+require "nice_delete"
