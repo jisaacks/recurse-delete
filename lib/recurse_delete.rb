@@ -1,6 +1,6 @@
-module NiceDelete
+module RecurseDelete
 
-  def nice_destroy(model_class=nil, ids=nil)
+  def recurse_delete(model_class=nil, ids=nil)
     ids = self.id if ids.nil?
     model_class = self.class if model_class.nil?
     
@@ -15,7 +15,7 @@ module NiceDelete
     end.map(&:name).each do |sub|
       sub_model_class = sub.to_s.classify.constantize
       sub_ids = sub_model_class.send("find_all_by_#{table_name.classify.foreign_key}", ids).map(&:id)
-      nice_destroy(sub_model_class, sub_ids)
+      recurse_delete(sub_model_class, sub_ids)
     end
     
     self
@@ -24,5 +24,5 @@ module NiceDelete
 end
 
 class ActiveRecord::Base
-  include NiceDelete
+  include RecurseDelete
 end
