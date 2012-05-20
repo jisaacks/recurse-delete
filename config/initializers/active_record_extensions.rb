@@ -1,1 +1,1 @@
-require "nice_delete"
+require "recurse_delete"
