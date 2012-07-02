@@ -1,4 +1,4 @@
-== Recurse Delete Example Usage
+##Recurse Delete Example Usage
 
 This is a rails project setup to demonstrate example usage for recurse delete.
 
