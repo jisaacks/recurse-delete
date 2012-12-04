@@ -1,4 +1,4 @@
-# Recurse Delete by John Isaacks (programming-perils.com)
+# Recurse Delete by JD Isaacks (jisaacks.com)
 #
 # Copyright (c) 2012 John Isaacks
 #
@@ -21,29 +21,33 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module RecurseDelete
+require 'valium'
 
-  def recurse_delete(model_class=nil, ids=nil)
-    ids = self.id if ids.nil?
-    model_class = self.class if model_class.nil?
-    
-    # Delete self
-    model_class.delete_all(:id => ids)
-    
-    # find and delete all dependent associations
-    delete_assocs = [:delete_all,:delete,:destroy,:destroy_all]
-    table_name = model_class.to_s.tableize
-    model_class.reflect_on_all_associations.select do |assoc|
-      delete_assocs.include? assoc.options[:dependent]
-    end.map(&:name).each do |sub|
-      sub_model_class = sub.to_s.classify.constantize
-      sub_ids = sub_model_class.send("find_all_by_#{table_name.classify.foreign_key}", ids).map(&:id)
-      recurse_delete(sub_model_class, sub_ids)
-    end
-    
-    self
+module RecurseDelete
+  def recurse_delete
+    delete_recursively self.class, self.id
   end
 
+  def delete_recursively(parent_class, parent_ids)
+    # delete all the parent records
+    parent_class.delete_all(:id => parent_ids)
+
+    # get the foreign key for the parent class
+    parent_key = parent_class.to_s.foreign_key
+
+    # get the assocs for the parent class
+    assocs = parent_class.reflect_on_all_associations.select do |assoc|
+      [:destroy, :destroy_all, :delete, :delete_all].include? assoc.options[:dependent]
+    end
+    assocs.map(&:name).each do |assoc|
+      # get the dependent class
+      dependent_class = assoc.to_s.classify.constantize
+      # get all the dependent record ids 
+      dependent_ids = dependent_class.where(parent_key => parent_ids).value_of(:id)
+      # recurse
+      delete_recursively(dependent_class, dependent_ids)
+    end
+  end
 end
 
 class ActiveRecord::Base
