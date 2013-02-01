@@ -24,6 +24,8 @@
 require 'valium'
 
 module RecurseDelete
+  extend ActiveSupport::Concern
+
   def recurse_delete
     delete_recursively self.class, self.id
   end
@@ -48,6 +50,19 @@ module RecurseDelete
       delete_recursively(dependent_class, dependent_ids)
     end
   end
+
+  module ClassMethods
+    def recurse_delete_all
+      delete_all
+      assocs = reflect_on_all_associations.select do |assoc|
+        [:destroy, :destroy_all, :delete, :delete_all].include? assoc.options[:dependent]
+      end
+      assocs.each do |assoc|
+        assoc.klass.recurse_delete_all
+      end
+    end
+  end
+
 end
 
 class ActiveRecord::Base
