@@ -42,7 +42,7 @@ module RecurseDelete
       # get the dependent class
       dependent_class = assoc.name.to_s.classify.constantize
       # get the foreign key
-      foreign_key = assoc.options[:foreign_key] or parent_class.to_s.foreign_key
+      foreign_key = (assoc.options[:foreign_key] or parent_class.to_s.foreign_key)
       # get all the dependent record ids 
       dependent_ids = dependent_class.where(foreign_key => parent_ids).value_of(:id)
       # recurse
