@@ -21,8 +21,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'valium'
-
 module RecurseDelete
   extend ActiveSupport::Concern
 
@@ -44,7 +42,7 @@ module RecurseDelete
       # get the foreign key
       foreign_key = (assoc.options[:foreign_key] or parent_class.to_s.foreign_key)
       # get all the dependent record ids 
-      dependent_ids = dependent_class.where(foreign_key => parent_ids).value_of(:id)
+      dependent_ids = dependent_class.where(foreign_key => parent_ids).pluck(:id)
       # recurse
       delete_recursively(dependent_class, dependent_ids)
     end
