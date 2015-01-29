@@ -38,7 +38,7 @@ module RecurseDelete
     end
     assocs.each do |assoc|
       # get the dependent class
-      dependent_class = assoc.name.to_s.classify.constantize
+      dependent_class = assoc.klass
       # get the foreign key
       foreign_key = (assoc.options[:foreign_key] or parent_class.to_s.foreign_key)
       # get all the dependent record ids 
