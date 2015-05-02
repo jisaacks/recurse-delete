@@ -30,7 +30,7 @@ module RecurseDelete
 
   def delete_recursively(parent_class, parent_ids)
     # delete all the parent records
-    parent_class.delete_all(:id => parent_ids)
+    parent_class.delete(parent_ids)
 
     # get the assocs for the parent class
     assocs = parent_class.reflect_on_all_associations.select do |assoc|
@@ -42,7 +42,7 @@ module RecurseDelete
       # get the foreign key
       foreign_key = (assoc.options[:foreign_key] or parent_class.to_s.foreign_key)
       # get all the dependent record ids 
-      dependent_ids = dependent_class.where(foreign_key => parent_ids).pluck(:id)
+      dependent_ids = dependent_class.where(foreign_key => parent_ids).ids
       # recurse
       delete_recursively(dependent_class, dependent_ids)
     end
